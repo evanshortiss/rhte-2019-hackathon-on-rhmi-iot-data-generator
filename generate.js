@@ -41,17 +41,10 @@ async function main () {
   // Assign random weights to junctions on startup
   assignJunctionWeights()
   // Set initial meter and junction states
-  updateMeters()
-  updateJunctions()
+  performUpdates()
 
   // Simulate flushing sensors every minute
-  setInterval(() => {
-    const start = Date.now()
-
-    performUpdates()
-
-    log('Updating meters and junctions executed in %dms', Date.now() - start)
-  }, 60 * 1000)
+  setInterval(performUpdates, 60 * 1000)
 }
 
 function performUpdates () {
@@ -60,7 +53,7 @@ function performUpdates () {
   updateMeters()
   updateJunctions()
 
-  log('Updating meters and junctions executed in %dms', Date.now() - start)
+  log(`Updating meters and junctions executed in ${Date.now() - start}ms`)
 }
 
 function updateJunctions () {
