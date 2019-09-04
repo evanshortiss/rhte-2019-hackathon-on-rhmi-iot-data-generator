@@ -60,17 +60,20 @@ function updateJunctions () {
   const timestamp = Date.now()
 
   junctionList.forEach((j) => {
-    const counts = {
-      ew: Math.round(Math.random() * j.weight),
-      ns: Math.round(Math.random() * j.weight)
-    }
-
+    // Junctions should meet a minimum threshold of 20% of their weight
+    // so they appear to be consistently busy if they have a heavy weight
+    const min = j.weight * 0.20
     const junctionId = j.id
+    const counts = {
+      ew: Math.round(Math.max(min, Math.random() * j.weight)),
+      ns: Math.round(Math.max(min, Math.random() * j.weight))
+    }
 
     const update = {
       junctionId,
       timestamp,
-      counts
+      counts,
+      w: j.weight
     }
 
     j.counts = counts
@@ -131,9 +134,9 @@ function assignJunctionWeights () {
   while (i < junctionList.length) {
     // Number of junctions for this batch. Using a random range creates
     // busy and not so busy clusters of junctions
-    const n = getRandomInt(15, 50)
-    // 0-10 scale for weight, or "busyness" of junctions
-    const w = getRandomInt(10, 50)
+    const n = getRandomInt(25, 75)
+    // Scale for weight, or "busyness" of junctions
+    const w = getRandomInt(2, 75)
 
     for (let j = 0; j <= n; j++) {
       if (junctionList[i + j]) {
