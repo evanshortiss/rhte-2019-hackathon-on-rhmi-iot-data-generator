@@ -4,10 +4,12 @@ const log = require('barelog')
 const csv = require('csvtojson')
 const weightedRandom = require('weighted-random')
 const { resolve } = require('path')
+const getTransport = require('./lib/transport')
 
-// These will be assigned JSON by "main"
+// These will be assigned JSON by "main" and "getTransport"
 let junctionList
 let meterList
+let transport
 
 const meterStates = [
   {
@@ -37,6 +39,7 @@ async function main () {
   meterList = await csv().fromFile(
     resolve(__dirname, './data/meter_info.csv')
   )
+  transport = await getTransport()
 
   // Assign random weights to junctions on startup
   assignJunctionWeights()
@@ -69,17 +72,7 @@ function updateJunctions () {
       ns: Math.round(Math.max(min, Math.random() * j.weight))
     }
 
-    const update = {
-      junctionId,
-      timestamp,
-      counts,
-      w: j.weight
-    }
-
-    j.counts = counts
-
-    // Our goal is to push to a topic, but console.log is ok for testing
-    log(`Emit Junction Update: ${JSON.stringify(update)}`)
+    transport.insertJunctionUpdate(junctionId, timestamp, counts.ew, counts.ns)
   })
 }
 
@@ -93,16 +86,10 @@ function updateMeters () {
     const status = getWeightedRandomMeterStatus().text
     const meterId = m.id
 
-    const update = {
-      meterId,
-      timestamp,
-      status
-    }
-
+    // For convenient logging. This is not written in the db
     m.status = status
 
-    // Our goal is to push to a topic, but console.log is ok for testing
-    log(`Emit Meter Update: ${JSON.stringify(update)}`)
+    transport.insertMeterUpdate(meterId, timestamp, status)
   })
 
   const counts = meterList.reduce((memo, cur) => {
