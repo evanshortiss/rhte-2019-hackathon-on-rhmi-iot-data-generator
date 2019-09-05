@@ -1,5 +1,7 @@
 # RHTE 2019 RHMI Hackathon IoT Data Generator
 
+*NOTE: This repo is archived. It is now hosted [here](https://github.com/evanshortiss/rhte-2019-hackathon-on-rhmi/tree/master/content/iot-data-generator)*
+
 ## About
 
 ### Data Structures
